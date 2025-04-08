@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "eslint": "^9.24.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.0.0",
+    "styled-components": "^6.1.17"
+  }
+}
