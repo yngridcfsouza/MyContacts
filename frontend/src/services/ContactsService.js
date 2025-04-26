@@ -1,17 +1,14 @@
-import delay from "../utils/delay";
+import HttpClient from "./utils/HttpClient";
 
 class ContactsService {
-  async loadContacts(orderBy = 'asc') {
 
-    const response = await fetch(
-      `http://localhost:3001/contacts?orderBy=${orderBy}`,
-    )
+  constructor() {
+    this.httpClient = new HttpClient('http://localhost:3001');
+  }
 
-    await delay(500);
-
-    return response.json();
-    /* body parse que permite pegar a resposta da request e transformar em um array com objetos json  */
+  async listContacts(orderBy = 'asc') {
+    return this.httpClient.get(`/contacts?orderBy=${orderBy}`);
   }
 }
-// eslint-disable-next-line import/no-anonymous-default-export
+// eslint-disable-next-line
 export default new ContactsService();
