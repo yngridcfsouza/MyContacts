@@ -9,6 +9,11 @@ class ContactsService {
   async listContacts(orderBy = 'asc') {
     return this.httpClient.get(`/contacts?orderBy=${orderBy}`);
   }
+
+  async createContact(contact) {
+    return this.httpClient.post('/contacts', contact);
+  }
 }
+
 // eslint-disable-next-line
 export default new ContactsService();

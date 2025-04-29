@@ -7,31 +7,62 @@ class HttpClient {
     this.baseURL = baseURL;
   }
 
-  async get(path) {
+  get(path, options) {
+    return this.makeRequest(path, {
+      method: 'GET',
+      headers: options?.headers,
+    });
+  }
+
+  post(path, options) {
+    return this.makeRequest(path, {
+      method: 'POST',
+      body: options?.body,
+      headers: options?.headers,
+    });
+  }
+
+  async makeRequest(path, options) {
 
     await delay(500);
 
+    /* ao invés de passar o objeto direto na response, pegando a instncia de Headers,
+     permite usar os métodos dela para manipular os objetos */
+    const headers = new Headers();
+
+    // evita preflights desnecessários
+    if (options.body) {
+      headers.append('Content-Type', 'application/json');
+    }
+
+    //custom headers
+    if (options.headers) {
+      Object.entries(options.headers).forEach(([name, value]) => {
+        headers.append(name, value);
+      });
+    }
+
     const response = await fetch(
-      `${this.baseURL}${path}`,
+      `${this.baseURL}${path}`, {
+        method: options.method,
+        body: JSON.stringify(options.body),
+        headers,
+      }
     )
 
-    let body = null;
+    let responseBody = null;
     const contentType = response.headers.get('content-type');
     if (contentType.includes('application/json')) {
-      body = await response.json();
+      responseBody = await response.json();
     }
-
-    /* body parse que permite pegar a resposta da request e transformar em um array com objetos json  */
 
     if (response.ok) {
-      return body;
+      return responseBody;
     }
     // optional chaining
-    throw new APIError(response, body);
+    throw new APIError(response, responseBody);
   }
-
 }
 
 // eslint-disable-next-line
 export default HttpClient;
-

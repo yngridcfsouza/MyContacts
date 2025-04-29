@@ -11,4 +11,15 @@ export const Container = styled.div`
     display: block;
     margin-top: 8px;
   }
+
+  .form-item {
+    position: relative;
+
+    .loader {
+      position: absolute;
+      top: 20px;
+      right: 32px;
+    }
+  }
+
 `;

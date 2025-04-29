@@ -25,7 +25,8 @@
     "semi": ["error", "always"],
     "indent": ["error", 2],
     "quotes": ["error", "single"],
-    "import/no-anonymous-default-export": "off"
+    "import/no-anonymous-default-export": "off",
+    "no-empty": ["error", { "allowEmptyCatch": true }]
   },
   "settings": {
     "react": {

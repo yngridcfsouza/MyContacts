@@ -1,12 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Container, InputSearchContainer, Header, ListHeader, Card, ErrorContainer } from "./styles";
+import {
+  Container,
+  InputSearchContainer,
+  Header,
+  ListHeader,
+  Card,
+  ErrorContainer,
+  EmpyListContainer,
+  SearchNotFoundContainer
+} from "./styles";
 
 import arrow from '../../assets/images/icons/arrow.svg';
 import edit from '../../assets/images/icons/edit.svg';
 import trash from '../../assets/images/icons/trash.svg';
 import sad from '../../assets/images/sad.svg';
+import emptyBox from '../../assets/images/empty-box.svg';
+import magnifierQuestion from '../../assets/images/magnifier-question.svg';
 
 /* import Modal from '../../components/Modal'; */
 import Loader from '../../components/Loader';
@@ -24,14 +35,15 @@ export default function Home() {
   const [hasError, setHasError] = useState(false);
 
   const filteredContacts = useMemo(() => contacts.filter((contact) => (
-    contact.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+    contact.name.toLowerCase().includes(searchTerm.toLowerCase())
   )), [contacts, searchTerm]);
 
-  async function loadContacts() {
+  const loadContacts = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const contactsList = await ContactsService.listContacts(orderBy);
+      //const contactsList = []; await ContactsService.listContacts(orderBy);
 
       setHasError(false);
       setContacts(contactsList);
@@ -40,7 +52,7 @@ export default function Home() {
     } finally {
         setIsLoading(false);
     }
-  }
+  }, [orderBy]);
 
   /* se ao invés de pesquisar o termo pelo pedaço do nome, também tem a opção
     de pesquisar pelo que for exatamente digitado, ao invés de usar o .includes()
@@ -49,7 +61,7 @@ export default function Home() {
 
   useEffect(() => {
     loadContacts();
-  }, [orderBy]);
+  }, [loadContacts]);
 
   function handleToggleOrderBy() {
     setOrderBy(
@@ -65,22 +77,34 @@ export default function Home() {
     loadContacts();
   }
 
+
   return (
     <Container>
 
       <Loader isLoading={isLoading}/>
 
-      <InputSearchContainer>
-        <input
-          value={searchTerm}
-          type="text"
-          placeholder="Pesquisar pelo nome..."
-          onChange={handleChangeSearchTerm}
-        />
-      </InputSearchContainer>
+      {contacts.length > 0 && (
+        <InputSearchContainer>
+          <input
+            value={searchTerm}
+            type="text"
+            placeholder="Pesquisar pelo nome..."
+            onChange={handleChangeSearchTerm}
+          />
+        </InputSearchContainer>
+      )}
 
-      <Header hasError={hasError}>
-        {!hasError && (
+      <Header $justifyContent={
+        hasError
+          ? 'flex-end'
+          : (
+            contacts.length > 0
+            ? 'space-between'
+            : 'center'
+          )
+        }
+      >
+        {(!hasError && contacts.length > 0) && (
           <strong>
             {filteredContacts.length}
             {filteredContacts.length === 1 ? ' contato' : ' contatos'}
@@ -101,6 +125,23 @@ export default function Home() {
 
       {!hasError && (
         <>
+          {(filteredContacts.length < 1 && contacts.length > 0) && (
+              <SearchNotFoundContainer>
+                <img src={magnifierQuestion} alt='Magnifier question'/>
+                <span>Nenhum resultado encontrado para <strong>{searchTerm}</strong>.</span>
+              </SearchNotFoundContainer>
+            )
+          }
+
+          {(contacts.length < 1 && !isLoading) && (
+            <EmpyListContainer>
+              <img src={emptyBox} alt='Empty-Box'/>
+              <p>
+                Você ainda não tem contatos cadastrados! Clique no botão <strong>"Novo contato"</strong> acima para cadastrar o seu primeiro!
+              </p>
+            </EmpyListContainer>
+          )}
+
           <ListHeader $orderBy={orderBy}>
             {filteredContacts.length > 0 && (
               <button type="button" onClick={handleToggleOrderBy}>

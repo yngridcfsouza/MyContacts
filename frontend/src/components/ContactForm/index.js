@@ -1,29 +1,45 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
-
-import useErrors from "../../hooks/useErrors";
+import { useEffect, useState } from "react";
 
 import isEmailValid from '../../utils/isEmailValid';
 import formatPhone from '../../utils/formatPhone';
 
 import FormGroup from "../FormGroup";
 import { Form, ButtonContainer } from "./styles";
+import useErrors from "../../hooks/useErrors";
+import CategoriesService from '../../services/CategoriesService';
 
 import Input from "../Input";
 import Select from "../Select";
 import Button from "../Button";
 
-export default function ContactForm({ buttonLabel }) {
+export default function ContactForm({ buttonLabel, onSubmit }) {
   /* O estado é o que permite que o que é digitado seja renderizado ONE-WAY DATA BINDING*/
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   /* importando de forma nomeada as funções de dentro do custom hook */
   const { errors, setError, removeError, getErrorMessageByFieldName} = useErrors();
 
   const isFormValid = (name && errors.length === 0);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+      const categoriesList = await CategoriesService.listCategories();
+
+      setCategories(categoriesList);
+    }  catch {} finally {
+      setIsLoadingCategories(false);
+    }
+    }
+
+    loadCategories();
+  }, []);
 
   function handleNameChange(event) {
     setName(event.target.value);
@@ -51,9 +67,10 @@ export default function ContactForm({ buttonLabel }) {
 
   function handleSubmit(event) {
     event.preventDefault(); /* evitando o recarregamento da página e de perder os dados */
-    console.log({
+
+    onSubmit({
       /* phone: phone.replace(/\D/g, '') permite que quando formos pegar os dígitos sem os caracteres especiais */
-      name, email, phone: phone.replace(/\D/g, ''), category,
+      name, email, phone: phone.replace(/\D/g, ''), categoryId,
     });
   }
 
@@ -90,14 +107,19 @@ export default function ContactForm({ buttonLabel }) {
         />
       </FormGroup>
 
-      <FormGroup>
+      <FormGroup isLoading={isLoadingCategories}>
         <Select
-          value={category} /* isso permite o gerenciamento (controle) do component pelo React  */
-          onChange={(event) => setCategory(event.target.value)}
+          value={categoryId} /* isso permite o gerenciamento (controle) do component pelo React  */
+          onChange={(event) => setCategoryId(event.target.value)}
+          disabled={isLoadingCategories}
         >
-          <option value=''>Categoria</option>
-          <option value='instagram'>Instagram</option>
-          <option value='discord'>Discord</option>
+          <option value=''>Sem Categoria</option>
+
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
         </Select>
       </FormGroup>
 
@@ -113,4 +135,5 @@ export default function ContactForm({ buttonLabel }) {
 
 FormGroup.propTypes = {
   buttonLabel: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 }
