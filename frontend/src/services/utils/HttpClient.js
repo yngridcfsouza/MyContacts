@@ -51,7 +51,7 @@ class HttpClient {
     )
 
     let responseBody = null;
-    const contentType = response.headers.get('content-type');
+    const contentType = response.headers.get('Content-Type');
     if (contentType.includes('application/json')) {
       responseBody = await response.json();
     }
