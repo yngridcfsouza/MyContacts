@@ -59,6 +59,7 @@ class HttpClient {
     if (response.ok) {
       return responseBody;
     }
+
     // optional chaining
     throw new APIError(response, responseBody);
   }

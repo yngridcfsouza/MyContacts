@@ -12,6 +12,7 @@ import CategoriesService from '../../services/CategoriesService';
 import Input from "../Input";
 import Select from "../Select";
 import Button from "../Button";
+import Spinner from "../Spinner";
 
 export default function ContactForm({ buttonLabel, onSubmit }) {
   /* O estado é o que permite que o que é digitado seja renderizado ONE-WAY DATA BINDING*/
@@ -21,6 +22,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /* importando de forma nomeada as funções de dentro do custom hook */
   const { errors, setError, removeError, getErrorMessageByFieldName} = useErrors();
@@ -65,13 +67,17 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
     setPhone(formatPhone(event.target.value));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault(); /* evitando o recarregamento da página e de perder os dados */
 
-    onSubmit({
+    setIsSubmitting(true);
+
+    await onSubmit({
       /* phone: phone.replace(/\D/g, '') permite que quando formos pegar os dígitos sem os caracteres especiais */
       name, email, phone: phone.replace(/\D/g, ''), categoryId,
     });
+
+    setIsSubmitting(false);
   }
 
   return (
@@ -84,6 +90,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
           placeholder="Nome *"
           value={name} /* isso permite o gerenciamento (controle) do component pelo React  */
           onChange={handleNameChange}
+          disabled={isSubmitting}
         />
       </FormGroup>
 
@@ -94,6 +101,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
           placeholder="E-mail"
           value={email} /* isso permite o gerenciamento (controle) do component pelo React  */
           onChange={handleEmailChange}
+          disabled={isSubmitting}
         />
       </FormGroup>
 
@@ -104,6 +112,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
           onChange={handlePhoneChange}
           /* não permite digitar números maiores que 11 dígitos */
           maxLength="15"
+          disabled={isSubmitting}
         />
       </FormGroup>
 
@@ -111,7 +120,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
         <Select
           value={categoryId} /* isso permite o gerenciamento (controle) do component pelo React  */
           onChange={(event) => setCategoryId(event.target.value)}
-          disabled={isLoadingCategories}
+          disabled={isLoadingCategories || isSubmitting}
         >
           <option value=''>Sem Categoria</option>
 
@@ -124,8 +133,9 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
       </FormGroup>
 
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>
-          {buttonLabel}
+        <Button type="submit" disabled={!isFormValid || isSubmitting}>
+          {!isSubmitting && buttonLabel}
+          {isSubmitting && <Spinner size={8} />}
         </Button>
       </ButtonContainer>
 
