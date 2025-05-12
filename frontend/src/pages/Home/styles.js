@@ -138,6 +138,10 @@ export const ErrorContainer = styled.div`
 
   .details {
     margin-left: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
     strong {
       color: ${({ theme }) => theme.colors.danger.main};
