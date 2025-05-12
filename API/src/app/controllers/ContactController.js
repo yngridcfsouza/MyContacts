@@ -31,7 +31,7 @@ class ContactController {
 
     const { name, email, phone, category_id } = request.body;
 
-    console.log( request.body);
+    console.log(request.body);
 
     if (!name) {
       return response.status(400).json({ error: 'Name is required' });
