@@ -1,66 +1,16 @@
-import { useParams, useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { useEffect, useState, useRef } from "react";
-
 import ContactForm from "../../components/ContactForm";
 import PageHeader from "../../components/PageHeader";
 import Loader from "../../components/Loader";
 
-import toast from "../../utils/toast";
-import ContactsService from "../../services/ContactsService";
-import useSafeAsyncAction from "../../hooks/useSafeAsyncAction";
+import useEditContact from "./useEditContact";
 
 export default function EditContact() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [contactName, setContactName] = useState('');
-
-  const contactFormRef = useRef(null);
-
-  const { id } = useParams();
-  const history = useHistory();
-  const safeAsyncAction = useSafeAsyncAction();
-
-  useEffect(() => {
-    async function loadContact() {
-      try {
-        const contact = await ContactsService.getContactById(id);
-
-        safeAsyncAction(() => {
-          contactFormRef.current.setFieldsValues(contact);
-          setIsLoading(false);
-          setContactName(contact.name);
-        });
-      } catch {
-        safeAsyncAction(() => {
-          history.push('/');
-          toast({
-            type: 'danger',
-            text: 'Usuário não encontrado',
-          });
-        });
-      }
-    }
-    loadContact();
-  }, [id, history, safeAsyncAction]);
-
-
-  async function handleSubmit(contact) {
-    try {
-      const contactData = await ContactsService.updateContact(id, contact);
-
-      setContactName(contactData.name);
-
-      toast({
-        type: 'success',
-        text: 'Contato editado com sucesso!',
-        duration: 3000,
-      });
-    } catch {
-      toast({
-        type: 'danger',
-        text: 'Ocorreu um problema ao editar o contato!',
-      });
-    }
-  }
+  const {
+    isLoading,
+    contactName,
+    contactFormRef,
+    handleSubmit,
+  } = useEditContact();
 
   return (
     <>
@@ -75,6 +25,5 @@ export default function EditContact() {
         ref={contactFormRef}
       />
     </>
-
   );
 }

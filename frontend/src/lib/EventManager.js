@@ -11,6 +11,7 @@ export default class EventManager {
     this.listeners.get(event).push(listener);
   }
 
+  /* payload → os dados que você quer enviar para as funções listener. (Ex.: informações de um usuário, dados de uma requisição, etc.) */
   emit(event, payload) {
     if (!this.listeners.has(event)) {
       return;
